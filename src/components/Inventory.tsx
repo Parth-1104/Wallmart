@@ -12,7 +12,7 @@ function groupByCategory(items: FoodItem[]): { category: string; items: FoodItem
   return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
 }
 
-export const Inventory: React.FC = () => {
+export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ onAddItem }) => {
   // Search state
   const [query, setQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
@@ -88,8 +88,17 @@ export const Inventory: React.FC = () => {
                   group.items.map((item: FoodItem, idx: number) => (
                     <div
                       key={item.id}
-                      className="min-w-[220px] max-w-xs bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-xl transition-shadow duration-300 snap-center animate-fadeIn"
+                      className="min-w-[220px] max-w-xs bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-xl transition-shadow duration-300 snap-center animate-fadeIn cursor-grab active:cursor-grabbing"
                       style={{ animationDelay: `${idx * 30}ms` }}
+                      draggable
+                      onDragStart={e => {
+                        e.dataTransfer.setData('application/json', JSON.stringify(item));
+                        e.currentTarget.classList.add('ring-4', 'ring-blue-400');
+                      }}
+                      onDragEnd={e => {
+                        e.currentTarget.classList.remove('ring-4', 'ring-blue-400');
+                      }}
+                      title="Drag to add to shopping list"
                     >
                       <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                         <span className="text-lg font-bold text-blue-600">{item.name.charAt(0)}</span>
@@ -98,6 +107,7 @@ export const Inventory: React.FC = () => {
                       <p className="text-gray-500 text-sm mb-1">Category: <span className="font-medium text-gray-700">{item.category}</span></p>
                       <p className="text-gray-400 text-xs">Aisle: {item.location.aisle}, Shelf: {item.location.shelf}</p>
                       <p className="text-gray-400 text-xs">Coords: ({item.location.coordinates.x}, {item.location.coordinates.y})</p>
+                      <span className="mt-2 text-xs text-blue-400">Drag to Shopping List</span>
                     </div>
                   ))
                 )}
