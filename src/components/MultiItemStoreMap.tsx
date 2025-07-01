@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FoodItem, StoreSection } from '../types';
 import { storeSections } from '../data/storeData';
 import { calculateOptimalRoute } from '../utils/optimalPathfinding';
+import { findPathAvoidingSections } from '../utils/pathfinding';
 
 interface MultiItemStoreMapProps {
   shoppingList: FoodItem[];
@@ -13,13 +14,24 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
   const [animationStep, setAnimationStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
-  const gridSize = { width: 18, height: 10 };
+  const gridSize = { width: 24, height: 14 };
 
   const optimalRoute = currentLocation && shoppingList.length > 0 && showRoute 
     ? calculateOptimalRoute(currentLocation, shoppingList)
     : null;
 
-  const allPathCoordinates = optimalRoute ? optimalRoute.fullPath : [];
+  let allPathCoordinates: { x: number; y: number }[] = [];
+  if (optimalRoute) {
+    let prev = currentLocation;
+    optimalRoute.visitOrder.forEach((item, idx) => {
+      if (prev) {
+        const prevCoords = { x: prev.x, y: prev.y };
+        const segPath = findPathAvoidingSections(prevCoords, item.location.coordinates);
+        allPathCoordinates = allPathCoordinates.concat(idx === 0 ? segPath : segPath.slice(1));
+        prev = { ...item.location.coordinates, name: item.name };
+      }
+    });
+  }
 
   useEffect(() => {
     if (showRoute && allPathCoordinates.length > 0) {
@@ -60,12 +72,6 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
     if (!showRoute) return false;
     const pathIndex = allPathCoordinates.findIndex(coord => coord.x === x && coord.y === y);
     return pathIndex !== -1 && pathIndex <= animationStep;
-  };
-
-  const isCurrentStep = (x: number, y: number) => {
-    if (!isAnimating || animationStep >= allPathCoordinates.length) return false;
-    const currentCoord = allPathCoordinates[animationStep];
-    return currentCoord && currentCoord.x === x && currentCoord.y === y;
   };
 
   const isDestination = (x: number, y: number) => {
@@ -132,14 +138,16 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <div 
           className="grid gap-1 mx-auto"
           style={{ 
             gridTemplateColumns: `repeat(${gridSize.width}, 1fr)`,
             gridTemplateRows: `repeat(${gridSize.height}, 1fr)`,
+            width: '100%',
             maxWidth: '800px',
-            aspectRatio: `${gridSize.width}/${gridSize.height}`
+            aspectRatio: `${gridSize.width}/${gridSize.height}`,
+            overflow: 'hidden',
           }}
         >
           {Array.from({ length: gridSize.height }).map((_, y) =>
@@ -150,7 +158,6 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
               const isItemDestination = isDestination(x, y);
               const destinationNumber = getDestinationNumber(x, y);
               const isPath = isOnPath(x, y);
-              const isCurrent = isCurrentStep(x, y);
 
               return (
                 <div
@@ -158,42 +165,30 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
                   className={`
                     relative border border-gray-200 transition-all duration-300 ease-in-out
                     ${section ? 'cursor-pointer hover:opacity-80' : 'bg-gray-50'}
-                    ${isCurrentLocation ? 'bg-green-500 border-green-600 shadow-lg' : ''}
-                    ${isItemDestination ? 'bg-red-500 border-red-600 shadow-lg' : ''}
+                    ${isCurrentLocation ? 'bg-green-500 border-4 border-green-400 shadow-lg shadow-green-300' : ''}
+                    ${isItemDestination ? 'bg-red-500 border-4 border-red-400 shadow-lg shadow-red-300' : ''}
                     ${isPath && !isCurrentLocation && !isItemDestination ? 'bg-blue-400 border-blue-500' : ''}
-                    ${isCurrent ? 'bg-yellow-400 border-yellow-500 shadow-lg scale-110 z-10' : ''}
                   `}
                   style={{
-                    backgroundColor: section && !isCurrentLocation && !isItemDestination && !isPath && !isCurrent
+                    backgroundColor: section && !isCurrentLocation && !isItemDestination && !isPath
                       ? section.color 
                       : undefined,
                     aspectRatio: '1',
-                    minHeight: '24px',
-                    transform: isCurrent ? 'scale(1.1)' : 'scale(1)',
-                    zIndex: isCurrent ? 10 : (isItemDestination ? 5 : 1)
+                    minHeight: '32px',
+                    zIndex: isItemDestination ? 5 : 1
                   }}
                   title={section ? section.name : ''}
                 >
                   {isCurrentLocation && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-3 h-3 bg-white rounded-full shadow-md"></div>
+                      <div className="w-4 h-4 bg-white rounded-full shadow-md"></div>
                     </div>
                   )}
                   {isItemDestination && destinationNumber && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center text-xs font-bold text-red-600 shadow-md">
+                      <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-xs font-bold text-red-600 shadow-md">
                         {destinationNumber}
                       </div>
-                    </div>
-                  )}
-                  {isCurrent && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce shadow-md"></div>
-                    </div>
-                  )}
-                  {isPath && !isCurrentLocation && !isItemDestination && !isCurrent && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-1 h-1 bg-white rounded-full opacity-80"></div>
                     </div>
                   )}
                 </div>
@@ -202,12 +197,38 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
           )}
         </div>
 
-        {/* Section Labels */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Blue trail SVG above grid */}
+        {showRoute && allPathCoordinates.length > 1 && (
+          <svg
+            className="absolute left-0 top-0 pointer-events-none z-20"
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${gridSize.width} ${gridSize.height}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              aspectRatio: `${gridSize.width}/${gridSize.height}`,
+              maxWidth: '800px',
+              maxHeight: 'auto',
+              overflow: 'hidden',
+            }}
+          >
+            <polyline
+              fill="none"
+              stroke="#2563eb"
+              strokeWidth={0.25}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              points={allPathCoordinates.map(p => `${p.x + 0.5},${p.y + 0.5}`).join(' ')}
+            />
+          </svg>
+        )}
+        {/* Section Labels above everything */}
+        <div className="absolute inset-0 pointer-events-none z-30">
           {storeSections.map(section => (
             <div
               key={section.id}
-              className="absolute flex items-center justify-center text-white font-medium text-xs text-center leading-tight px-1"
+              className="absolute flex items-center justify-center text-black font-medium text-xs text-center leading-tight px-1"
               style={{
                 left: `${(section.coordinates.x / gridSize.width) * 100}%`,
                 top: `${(section.coordinates.y / gridSize.height) * 100}%`,

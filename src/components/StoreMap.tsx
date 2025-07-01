@@ -1,7 +1,7 @@
 import React from 'react';
 import { FoodItem, StoreSection } from '../types';
 import { storeSections } from '../data/storeData';
-import { generatePathCoordinates } from '../utils/pathfinding';
+import { findPathAvoidingSections } from '../utils/pathfinding';
 
 interface StoreMapProps {
   selectedItem: FoodItem | null;
@@ -9,11 +9,11 @@ interface StoreMapProps {
 }
 
 export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
-  const gridSize = { width: 18, height: 10 };
+  const gridSize = { width: 24, height: 14 };
   const entranceLocation = { x: 2, y: 9 };
 
   const pathCoordinates = selectedItem && showRoute 
-    ? generatePathCoordinates(entranceLocation, selectedItem.location.coordinates)
+    ? findPathAvoidingSections(entranceLocation, selectedItem.location.coordinates)
     : [];
 
   const isOnPath = (x: number, y: number) => {
@@ -53,14 +53,16 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <div 
           className="grid gap-1 mx-auto"
           style={{ 
             gridTemplateColumns: `repeat(${gridSize.width}, 1fr)`,
             gridTemplateRows: `repeat(${gridSize.height}, 1fr)`,
+            width: '100%',
             maxWidth: '800px',
-            aspectRatio: `${gridSize.width}/${gridSize.height}`
+            aspectRatio: `${gridSize.width}/${gridSize.height}`,
+            overflow: 'hidden',
           }}
         >
           {Array.from({ length: gridSize.height }).map((_, y) =>
@@ -78,8 +80,8 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
                   className={`
                     relative border border-gray-200 transition-all duration-300
                     ${section ? 'cursor-pointer hover:opacity-80' : 'bg-gray-50'}
-                    ${isEntrance ? 'bg-green-500 border-green-600' : ''}
-                    ${isDestination ? 'bg-red-500 border-red-600 animate-pulse' : ''}
+                    ${isEntrance ? 'bg-green-500 border-4 border-green-400 shadow-lg shadow-green-300' : ''}
+                    ${isDestination ? 'bg-red-500 border-4 border-red-400 shadow-lg shadow-red-300 animate-pulse' : ''}
                     ${isPath && !isEntrance && !isDestination ? 'bg-blue-400 border-blue-500' : ''}
                   `}
                   style={{
@@ -87,18 +89,18 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
                       ? section.color 
                       : undefined,
                     aspectRatio: '1',
-                    minHeight: '24px'
+                    minHeight: '32px'
                   }}
                   title={section ? section.name : ''}
                 >
                   {isEntrance && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="w-4 h-4 bg-white rounded-full shadow-md"></div>
                     </div>
                   )}
                   {isDestination && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                      <div className="w-4 h-4 bg-white rounded-full animate-ping"></div>
                     </div>
                   )}
                 </div>
@@ -107,12 +109,38 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
           )}
         </div>
 
-        {/* Section Labels */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Blue trail SVG above grid */}
+        {showRoute && pathCoordinates.length > 1 && (
+          <svg
+            className="absolute left-0 top-0 pointer-events-none z-20"
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${gridSize.width} ${gridSize.height}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              aspectRatio: `${gridSize.width}/${gridSize.height}`,
+              maxWidth: '800px',
+              maxHeight: 'auto',
+              overflow: 'hidden',
+            }}
+          >
+            <polyline
+              fill="none"
+              stroke="#2563eb"
+              strokeWidth={0.25}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              points={pathCoordinates.map(p => `${p.x + 0.5},${p.y + 0.5}`).join(' ')}
+            />
+          </svg>
+        )}
+        {/* Section Labels above everything */}
+        <div className="absolute inset-0 pointer-events-none z-30">
           {storeSections.map(section => (
             <div
               key={section.id}
-              className="absolute flex items-center justify-center text-white font-medium text-xs text-center leading-tight px-1"
+              className="absolute flex items-center justify-center text-black font-medium text-xs text-center leading-tight px-1"
               style={{
                 left: `${(section.coordinates.x / gridSize.width) * 100}%`,
                 top: `${(section.coordinates.y / gridSize.height) * 100}%`,
