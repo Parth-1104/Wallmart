@@ -119,15 +119,10 @@ export function findPathAvoidingSections(
     ]) {
       const nx = x + dx;
       const ny = y + dy;
-      // Only block horizontal moves through sections
-      let blocked = false;
-      if ((dx === 1 || dx === -1) && isBlocked(nx, ny, allowedSectionId)) {
-        blocked = true;
-      }
-      // Vertical moves are always allowed, even through sections
+      // Block all moves through sections (except destination section)
       if (
         nx < 0 || ny < 0 || nx > 30 || ny > 30 ||
-        blocked ||
+        isBlocked(nx, ny, allowedSectionId) ||
         visited.has(`${nx},${ny}`)
       ) {
         continue;

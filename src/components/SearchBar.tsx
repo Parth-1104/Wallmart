@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { FoodItem } from '../types';
-import { foodItems } from '../data/storeData';
+import { foodItems, storeSections } from '../data/storeData';
 
 interface SearchBarProps {
   onItemSelect: (item: FoodItem) => void;
@@ -13,20 +13,23 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string>('all');
 
   useEffect(() => {
-    if (query.length > 0) {
+    if (query.length > 0 || selectedSection !== 'all') {
       const filtered = foodItems.filter(item =>
-        item.name.toLowerCase().includes(query.toLowerCase()) ||
-        item.category.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 8);
-      setSuggestions(filtered);
-      setShowSuggestions(true);
+        (query.length === 0 ||
+          item.name.toLowerCase().includes(query.toLowerCase()) ||
+          item.category.toLowerCase().includes(query.toLowerCase())) &&
+        (selectedSection === 'all' || item.location.section === selectedSection)
+      );
+      setSuggestions(filtered.slice(0, 8));
+      setShowSuggestions(filtered.length > 0);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [query]);
+  }, [query, selectedSection]);
 
   const handleSelectItem = (item: FoodItem) => {
     setQuery(item.name);
@@ -41,8 +44,25 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
     onClear();
   };
 
+  const handleSectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedSection(e.target.value);
+  };
+
   return (
     <div className="relative w-full max-w-md">
+      {/* Section/category dropdown */}
+      <div className="mb-2">
+        <select
+          value={selectedSection}
+          onChange={handleSectionChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 bg-white"
+        >
+          <option value="all">All Sections</option>
+          {storeSections.map(section => (
+            <option key={section.id} value={section.id}>{section.name}</option>
+          ))}
+        </select>
+      </div>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
