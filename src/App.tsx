@@ -6,6 +6,7 @@ import { MultiItemStoreMap } from './components/MultiItemStoreMap';
 import { MultiItemNavigationPanel } from './components/MultiItemNavigationPanel';
 import { LocationSelector } from './components/LocationSelector';
 import { FoodItem } from './types';
+import { Inventory } from './components/Inventory';
 
 function App() {
   const [shoppingList, setShoppingList] = useState<FoodItem[]>([]);
@@ -66,14 +67,6 @@ function App() {
               onLocationSelect={handleLocationSelect}
               selectedLocation={currentLocation}
             />
-            
-            <ShoppingListManager
-              shoppingList={shoppingList}
-              onAddItem={handleAddItem}
-              onRemoveItem={handleRemoveItem}
-              onClearList={handleClearList}
-            />
-            
             <MultiItemNavigationPanel 
               shoppingList={shoppingList}
               currentLocation={currentLocation}
@@ -81,8 +74,36 @@ function App() {
           </div>
         </div>
 
+        {/* Inventory + Shopping List Side by Side */}
+        <div className="flex flex-col lg:flex-row gap-8 mt-12 items-start justify-center">
+          <Inventory onAddItem={handleAddItem} />
+          <div
+            onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('ring-4', 'ring-green-400'); }}
+            onDragLeave={e => { e.currentTarget.classList.remove('ring-4', 'ring-green-400'); }}
+            onDrop={e => {
+              e.preventDefault();
+              e.currentTarget.classList.remove('ring-4', 'ring-green-400');
+              try {
+                const data = e.dataTransfer.getData('application/json');
+                if (data) {
+                  const item = JSON.parse(data);
+                  handleAddItem(item);
+                }
+              } catch {}
+            }}
+            className="transition-all w-full lg:w-[28rem]"
+          >
+            <ShoppingListManager
+              shoppingList={shoppingList}
+              onAddItem={handleAddItem}
+              onRemoveItem={handleRemoveItem}
+              onClearList={handleClearList}
+            />
+          </div>
+        </div>
+        
         {/* Features Section */}
-        {shoppingList.length === 0 && (
+        {/* {shoppingList.length === 0 && (
           <div className="mt-12 grid md:grid-cols-4 gap-6">
             <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -116,7 +137,7 @@ function App() {
               <p className="text-gray-600 text-sm">Save 30-40% shopping time with optimized store navigation</p>
             </div>
           </div>
-        )}
+        )} */}
       </main>
     </div>
   );

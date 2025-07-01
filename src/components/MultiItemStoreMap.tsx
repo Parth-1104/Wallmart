@@ -3,6 +3,7 @@ import { FoodItem } from '../types';
 import { storeSections } from '../data/storeData';
 import { calculateOptimalRoute } from '../utils/optimalPathfinding';
 import { findPathAvoidingSections } from '../utils/pathfinding';
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface MultiItemStoreMapProps {
   shoppingList: FoodItem[];
@@ -88,8 +89,40 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
     return itemIndex !== -1 ? itemIndex + 1 : null;
   };
 
+  // Dynamic island status for multi-item
+  const currentStep = showRoute && allPathCoordinates.length > 1 ? animationStep + 1 : 0;
+  const totalSteps = allPathCoordinates.length;
+  let direction = null;
+  if (showRoute && allPathCoordinates.length > 1 && animationStep < allPathCoordinates.length - 1) {
+    const from = allPathCoordinates[animationStep];
+    const to = allPathCoordinates[animationStep + 1];
+    if (to.x > from.x) direction = 'right';
+    else if (to.x < from.x) direction = 'left';
+    else if (to.y > from.y) direction = 'down';
+    else if (to.y < from.y) direction = 'up';
+  }
+  const currentItem = optimalRoute && currentItemIndex < optimalRoute.visitOrder.length ? optimalRoute.visitOrder[currentItemIndex] : null;
+  const hasDeal = currentItem && currentItem.deal;
+
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+    <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 p-6 rounded-3xl shadow-2xl border border-gray-100 relative">
+      {/* Dynamic Island */}
+      <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-40 px-6 py-3 rounded-full shadow-xl bg-black/80 flex items-center gap-4 text-white text-base font-medium min-w-[260px] max-w-[90vw] border border-gray-900/30">
+        <span>
+          {currentStep === 0 ? 'Start' : `Step ${currentStep} / ${totalSteps}`}
+        </span>
+        {direction === 'up' && <ArrowUp className="w-5 h-5 text-blue-300" />}
+        {direction === 'down' && <ArrowDown className="w-5 h-5 text-blue-300" />}
+        {direction === 'left' && <ArrowLeft className="w-5 h-5 text-blue-300" />}
+        {direction === 'right' && <ArrowRight className="w-5 h-5 text-blue-300" />}
+        {currentItem && (
+          <span className="truncate">→ {currentItem.name}</span>
+        )}
+        {hasDeal && (
+          <span className="inline-block bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded ml-2 animate-pulse">{currentItem.deal}</span>
+        )}
+      </div>
+
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-semibold text-gray-800">Optimal Shopping Route</h2>
@@ -171,6 +204,7 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
               const isCurrentLocation = currentLocation && 
                 x === currentLocation.x && y === currentLocation.y;
               const isItemDestination = isDestination(x, y);
+              const isDeal = isItemDestination && hasDeal;
               const destinationNumber = getDestinationNumber(x, y);
               const isPath = isOnPath(x, y);
 
@@ -180,7 +214,7 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
                   className={`
                     relative border border-gray-200 transition-all duration-300 ease-in-out
                     ${isCurrentLocation ? 'bg-green-500 border-4 border-green-400 shadow-lg shadow-green-300' : ''}
-                    ${isItemDestination ? 'bg-red-500 border-4 border-red-400 shadow-lg shadow-red-300' : ''}
+                    ${isItemDestination ? `bg-red-500 border-4 ${isDeal ? 'border-yellow-400 shadow-lg shadow-yellow-300 animate-pulse' : 'border-red-400 shadow-lg shadow-red-300'}` : ''}
                     ${isPath && !isCurrentLocation && !isItemDestination ? 'bg-blue-400 border-blue-500' : ''}
                   `}
                   style={{
@@ -209,7 +243,7 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
           )}
         </div>
 
-        {/* Blue trail SVG above grid */}
+        {/* Blue trail SVG with direction arrows */}
         {showRoute && allPathCoordinates.length > 1 && (
           <svg
             className="absolute left-0 top-0 pointer-events-none z-20"
@@ -233,6 +267,29 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
               strokeLinecap="round"
               points={allPathCoordinates.map(p => `${p.x + 0.5},${p.y + 0.5}`).join(' ')}
             />
+            {/* Direction arrows on path */}
+            {allPathCoordinates.slice(0, -1).map((from, i) => {
+              const to = allPathCoordinates[i + 1];
+              let arrow = null;
+              if (to.x > from.x) arrow = <ArrowRight className="w-3 h-3 text-blue-500" />;
+              else if (to.x < from.x) arrow = <ArrowLeft className="w-3 h-3 text-blue-500" />;
+              else if (to.y > from.y) arrow = <ArrowDown className="w-3 h-3 text-blue-500" />;
+              else if (to.y < from.y) arrow = <ArrowUp className="w-3 h-3 text-blue-500" />;
+              return (
+                <foreignObject
+                  key={i}
+                  x={from.x + 0.25}
+                  y={from.y + 0.25}
+                  width={0.5}
+                  height={0.5}
+                  style={{ overflow: 'visible' }}
+                >
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {arrow}
+                  </div>
+                </foreignObject>
+              );
+            })}
           </svg>
         )}
         {/* Section Labels above everything */}

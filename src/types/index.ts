@@ -8,6 +8,7 @@ export interface FoodItem {
     shelf: string;
     coordinates: { x: number; y: number };
   };
+  deal?: string;
 }
 
 export interface StoreSection {
