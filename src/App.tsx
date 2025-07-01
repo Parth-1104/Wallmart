@@ -7,6 +7,7 @@ import { MultiItemNavigationPanel } from './components/MultiItemNavigationPanel'
 import { LocationSelector } from './components/LocationSelector';
 import { FoodItem } from './types';
 import { Inventory } from './components/Inventory';
+import Chatbot from '../chatbot/chat';
 
 function App() {
   const [shoppingList, setShoppingList] = useState<FoodItem[]>([]);
@@ -139,6 +140,9 @@ function App() {
           </div>
         )} */}
       </main>
+      <div className="fixed bottom-4 right-4 z-50">
+        <Chatbot />
+      </div>
     </div>
   );
 }
