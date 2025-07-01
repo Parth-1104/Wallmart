@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 .env
 
-chatbot/database/walmart/
+.venv/
