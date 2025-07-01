@@ -6,6 +6,7 @@ import { MultiItemStoreMap } from './components/MultiItemStoreMap';
 import { MultiItemNavigationPanel } from './components/MultiItemNavigationPanel';
 import { LocationSelector } from './components/LocationSelector';
 import { FoodItem } from './types';
+import { Inventory } from './components/Inventory';
 
 function App() {
   const [shoppingList, setShoppingList] = useState<FoodItem[]>([]);
@@ -81,8 +82,11 @@ function App() {
           </div>
         </div>
 
+        {/* Inventory Section */}
+        <Inventory />
+        
         {/* Features Section */}
-        {shoppingList.length === 0 && (
+        {/* {shoppingList.length === 0 && (
           <div className="mt-12 grid md:grid-cols-4 gap-6">
             <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -116,7 +120,7 @@ function App() {
               <p className="text-gray-600 text-sm">Save 30-40% shopping time with optimized store navigation</p>
             </div>
           </div>
-        )}
+        )} */}
       </main>
     </div>
   );
