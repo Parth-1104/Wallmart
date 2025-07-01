@@ -67,14 +67,6 @@ function App() {
               onLocationSelect={handleLocationSelect}
               selectedLocation={currentLocation}
             />
-            
-            <ShoppingListManager
-              shoppingList={shoppingList}
-              onAddItem={handleAddItem}
-              onRemoveItem={handleRemoveItem}
-              onClearList={handleClearList}
-            />
-            
             <MultiItemNavigationPanel 
               shoppingList={shoppingList}
               currentLocation={currentLocation}
@@ -82,8 +74,33 @@ function App() {
           </div>
         </div>
 
-        {/* Inventory Section */}
-        <Inventory />
+        {/* Inventory + Shopping List Side by Side */}
+        <div className="flex flex-col lg:flex-row gap-8 mt-12 items-start justify-center">
+          <Inventory onAddItem={handleAddItem} />
+          <div
+            onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('ring-4', 'ring-green-400'); }}
+            onDragLeave={e => { e.currentTarget.classList.remove('ring-4', 'ring-green-400'); }}
+            onDrop={e => {
+              e.preventDefault();
+              e.currentTarget.classList.remove('ring-4', 'ring-green-400');
+              try {
+                const data = e.dataTransfer.getData('application/json');
+                if (data) {
+                  const item = JSON.parse(data);
+                  handleAddItem(item);
+                }
+              } catch {}
+            }}
+            className="transition-all w-full lg:w-[28rem]"
+          >
+            <ShoppingListManager
+              shoppingList={shoppingList}
+              onAddItem={handleAddItem}
+              onRemoveItem={handleRemoveItem}
+              onClearList={handleClearList}
+            />
+          </div>
+        </div>
         
         {/* Features Section */}
         {/* {shoppingList.length === 0 && (
