@@ -1,12 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FoodItem } from '../types';
 import { storeSections } from '../data/storeData';
 import { findPathAvoidingSections } from '../utils/pathfinding';
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface StoreMapProps {
   selectedItem: FoodItem | null;
   showRoute: boolean;
 }
+
+// Section tips for flash cards (move outside component for clarity)
+const sectionTips: Record<string, string> = {
+  Produce: 'Fresh fruits and veggies are restocked daily!',
+  Dairy: 'Check the back for the coldest milk.',
+  Bakery: 'Try our new artisan breads!',
+  Meat: 'Ask the butcher for custom cuts.',
+  Frozen: 'Frozen foods are perfect for quick meals.',
+  Household: 'Stock up on cleaning essentials!',
+  Pets: "Don't forget treats for your furry friends!",
+  Electronics: 'Check out the latest gadgets!',
+  Clothing: 'New arrivals every week!',
+  Toys: 'Find the perfect gift for kids!',
+  Stationery: 'Back-to-school deals available!',
+  Checkout: "Ready to check out? Don't forget your coupons!"
+  // Add more as needed
+};
 
 export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
   const gridSize = { width: 24, height: 14 };
@@ -20,8 +38,70 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
     return pathCoordinates.some(coord => coord.x === x && coord.y === y);
   };
 
+  // Dynamic island status
+  const currentStep = showRoute && pathCoordinates.length > 1 ? 1 : 0;
+  const totalSteps = pathCoordinates.length;
+  let direction = null;
+  const hasDeal = selectedItem && selectedItem.deal;
+  if (showRoute && pathCoordinates.length > 1) {
+    const from = pathCoordinates[0];
+    const to = pathCoordinates[1];
+    if (to.x > from.x) direction = 'right';
+    else if (to.x < from.x) direction = 'left';
+    else if (to.y > from.y) direction = 'down';
+    else if (to.y < from.y) direction = 'up';
+  }
+
+  const [flashCard, setFlashCard] = useState<{ sectionName: string; tip: string } | null>(null);
+  const lastSectionRef = useRef<string | null>(null);
+
+  // Only reset flash card when navigation is turned off or item is cleared
+  useEffect(() => {
+    if (!showRoute || !selectedItem) {
+      lastSectionRef.current = null;
+      setFlashCard(null);
+    }
+  }, [selectedItem, showRoute]);
+
+  // Show flash card for the destination section as soon as the route is shown
+  useEffect(() => {
+    if (!showRoute || !selectedItem) return;
+    const destinationCoord = selectedItem.location.coordinates;
+    const destinationSection = storeSections.find(section =>
+      destinationCoord.x >= section.coordinates.x &&
+      destinationCoord.x < section.coordinates.x + section.coordinates.width &&
+      destinationCoord.y >= section.coordinates.y &&
+      destinationCoord.y < section.coordinates.y + section.coordinates.height
+    );
+    if (destinationSection) {
+      setFlashCard({
+        sectionName: destinationSection.name,
+        tip: sectionTips[destinationSection.name] || 'Enjoy shopping in this section!'
+      });
+      const timeout = setTimeout(() => setFlashCard(null), 3200);
+      return () => clearTimeout(timeout);
+    }
+  }, [showRoute, selectedItem, storeSections]);
+
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+    <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 p-6 rounded-3xl shadow-2xl border border-gray-100 relative">
+      {/* Dynamic Island */}
+      <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-40 px-6 py-3 rounded-full shadow-xl bg-black/80 flex items-center gap-4 text-white text-base font-medium min-w-[260px] max-w-[90vw] border border-gray-900/30">
+        <span>
+          {currentStep === 0 ? 'Start' : `Step ${currentStep} / ${totalSteps}`}
+        </span>
+        {direction === 'up' && <ArrowUp className="w-5 h-5 text-blue-300" />}
+        {direction === 'down' && <ArrowDown className="w-5 h-5 text-blue-300" />}
+        {direction === 'left' && <ArrowLeft className="w-5 h-5 text-blue-300" />}
+        {direction === 'right' && <ArrowRight className="w-5 h-5 text-blue-300" />}
+        {selectedItem && (
+          <span className="truncate">→ {selectedItem.name}</span>
+        )}
+        {hasDeal && (
+          <span className="inline-block bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded ml-2 animate-pulse">{selectedItem.deal}</span>
+        )}
+      </div>
+
       <div className="mb-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Store Map</h2>
         <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -87,6 +167,7 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
               const isDestination = selectedItem && 
                 x === selectedItem.location.coordinates.x && 
                 y === selectedItem.location.coordinates.y;
+              const isDeal = isDestination && hasDeal;
               const isPath = isOnPath(x, y);
 
               return (
@@ -95,7 +176,7 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
                   className={`
                     relative border border-gray-200 transition-all duration-300
                     ${isEntrance ? 'bg-green-500 border-4 border-green-400 shadow-lg shadow-green-300' : ''}
-                    ${isDestination ? 'bg-red-500 border-4 border-red-400 shadow-lg shadow-red-300 animate-pulse' : ''}
+                    ${isDestination ? `bg-red-500 border-4 ${isDeal ? 'border-yellow-400 shadow-lg shadow-yellow-300 animate-pulse' : 'border-red-400 shadow-lg shadow-red-300 animate-pulse'}` : ''}
                     ${isPath && !isEntrance && !isDestination ? 'bg-blue-400 border-blue-500' : ''}
                   `}
                   style={{
@@ -121,7 +202,7 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
           )}
         </div>
 
-        {/* Blue trail SVG above grid */}
+        {/* Blue trail SVG with direction arrows */}
         {showRoute && pathCoordinates.length > 1 && (
           <svg
             className="absolute left-0 top-0 pointer-events-none z-20"
@@ -145,6 +226,29 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
               strokeLinecap="round"
               points={pathCoordinates.map(p => `${p.x + 0.5},${p.y + 0.5}`).join(' ')}
             />
+            {/* Direction arrows on path */}
+            {pathCoordinates.slice(0, -1).map((from, i) => {
+              const to = pathCoordinates[i + 1];
+              let arrow = null;
+              if (to.x > from.x) arrow = <ArrowRight className="w-3 h-3 text-blue-500" />;
+              else if (to.x < from.x) arrow = <ArrowLeft className="w-3 h-3 text-blue-500" />;
+              else if (to.y > from.y) arrow = <ArrowDown className="w-3 h-3 text-blue-500" />;
+              else if (to.y < from.y) arrow = <ArrowUp className="w-3 h-3 text-blue-500" />;
+              return (
+                <foreignObject
+                  key={i}
+                  x={from.x + 0.25}
+                  y={from.y + 0.25}
+                  width={0.5}
+                  height={0.5}
+                  style={{ overflow: 'visible' }}
+                >
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {arrow}
+                  </div>
+                </foreignObject>
+              );
+            })}
           </svg>
         )}
         {/* Section Labels above everything */}
@@ -179,6 +283,21 @@ export function StoreMap({ selectedItem, showRoute }: StoreMapProps) {
           </div>
         ))}
       </div>
+
+      {/* Section Flash Card Popover */}
+      {flashCard && (
+        <div
+          role="dialog"
+          aria-live="polite"
+          aria-label={`Now entering ${flashCard.sectionName}`}
+          className="fixed left-1/2 top-24 z-50 -translate-x-1/2 bg-white rounded-2xl shadow-2xl border-2 border-blue-300 px-8 py-6 flex flex-col items-center animate-fade-in-up focus:outline-none"
+          tabIndex={0}
+        >
+          <div className="text-lg font-bold text-blue-700 mb-1">{flashCard.sectionName}</div>
+          <div className="text-gray-700 text-base mb-2">{flashCard.tip}</div>
+          <div className="w-12 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mt-2" />
+        </div>
+      )}
     </div>
   );
 }

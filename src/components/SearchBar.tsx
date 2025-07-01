@@ -14,14 +14,16 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [showDealsOnly, setShowDealsOnly] = useState(false);
 
   useEffect(() => {
-    if (query.length > 0 || selectedSection !== 'all') {
+    if (query.length > 0 || selectedSection !== 'all' || showDealsOnly) {
       const filtered = foodItems.filter(item =>
-        (query.length === 0 ||
+        (query.length === 0 || 
           item.name.toLowerCase().includes(query.toLowerCase()) ||
           item.category.toLowerCase().includes(query.toLowerCase())) &&
-        (selectedSection === 'all' || item.location.section === selectedSection)
+        (selectedSection === 'all' || item.location.section === selectedSection) &&
+        (!showDealsOnly || item.deal)
       );
       setSuggestions(filtered.slice(0, 8));
       setShowSuggestions(filtered.length > 0);
@@ -29,7 +31,7 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [query, selectedSection]);
+  }, [query, selectedSection, showDealsOnly]);
 
   const handleSelectItem = (item: FoodItem) => {
     setQuery(item.name);
@@ -48,10 +50,14 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
     setSelectedSection(e.target.value);
   };
 
+  const handleDealsOnlyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShowDealsOnly(e.target.checked);
+  };
+
   return (
     <div className="relative w-full max-w-md">
-      {/* Section/category dropdown */}
-      <div className="mb-2">
+      {/* Section/category dropdown and deals filter */}
+      <div className="flex items-center gap-3 mb-2">
         <select
           value={selectedSection}
           onChange={handleSectionChange}
@@ -62,6 +68,10 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
             <option key={section.id} value={section.id}>{section.name}</option>
           ))}
         </select>
+        <label className="flex items-center gap-1 text-xs text-blue-700 whitespace-nowrap">
+          <input type="checkbox" checked={showDealsOnly} onChange={handleDealsOnlyChange} className="accent-blue-600" />
+          Show Deals Only
+        </label>
       </div>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -91,7 +101,12 @@ export function SearchBar({ onItemSelect, selectedItem, onClear }: SearchBarProp
               className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center justify-between"
             >
               <div>
-                <div className="font-medium text-gray-800">{item.name}</div>
+                <div className="font-medium text-gray-800 flex items-center gap-2">
+                  {item.name}
+                  {item.deal && (
+                    <span className="inline-block bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded ml-1">{item.deal}</span>
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">{item.category} • Aisle {item.location.aisle}</div>
               </div>
               <div className="text-xs text-gray-400">{item.location.section}</div>
