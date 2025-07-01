@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FoodItem, StoreSection } from '../types';
+import { FoodItem } from '../types';
 import { storeSections } from '../data/storeData';
 import { calculateOptimalRoute } from '../utils/optimalPathfinding';
 import { findPathAvoidingSections } from '../utils/pathfinding';
@@ -88,15 +88,6 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
     return itemIndex !== -1 ? itemIndex + 1 : null;
   };
 
-  const getSectionAt = (x: number, y: number): StoreSection | null => {
-    return storeSections.find(section => 
-      x >= section.coordinates.x && 
-      x < section.coordinates.x + section.coordinates.width &&
-      y >= section.coordinates.y && 
-      y < section.coordinates.y + section.coordinates.height
-    ) || null;
-  };
-
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
       <div className="mb-4">
@@ -139,8 +130,26 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
       </div>
 
       <div className="relative overflow-hidden">
+        {/* Section blocks as single tiles */}
+        <div className="absolute left-0 top-0 w-full h-full z-10 pointer-events-none">
+          {storeSections.map(section => (
+            <div
+              key={section.id}
+              className="absolute border border-gray-300 rounded-lg"
+              style={{
+                left: `${(section.coordinates.x / gridSize.width) * 100}%`,
+                top: `${(section.coordinates.y / gridSize.height) * 100}%`,
+                width: `${(section.coordinates.width / gridSize.width) * 100}%`,
+                height: `${(section.coordinates.height / gridSize.height) * 100}%`,
+                backgroundColor: section.color,
+                opacity: 0.85,
+              }}
+              title={section.name}
+            />
+          ))}
+        </div>
         <div 
-          className="grid gap-1 mx-auto"
+          className="grid gap-0 mx-auto relative z-20"
           style={{ 
             gridTemplateColumns: `repeat(${gridSize.width}, 1fr)`,
             gridTemplateRows: `repeat(${gridSize.height}, 1fr)`,
@@ -152,7 +161,13 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
         >
           {Array.from({ length: gridSize.height }).map((_, y) =>
             Array.from({ length: gridSize.width }).map((_, x) => {
-              const section = getSectionAt(x, y);
+              // Find if this cell is inside a section
+              const section = storeSections.find(section =>
+                x >= section.coordinates.x &&
+                x < section.coordinates.x + section.coordinates.width &&
+                y >= section.coordinates.y &&
+                y < section.coordinates.y + section.coordinates.height
+              );
               const isCurrentLocation = currentLocation && 
                 x === currentLocation.x && y === currentLocation.y;
               const isItemDestination = isDestination(x, y);
@@ -164,20 +179,17 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
                   key={`${x}-${y}`}
                   className={`
                     relative border border-gray-200 transition-all duration-300 ease-in-out
-                    ${section ? 'cursor-pointer hover:opacity-80' : 'bg-gray-50'}
                     ${isCurrentLocation ? 'bg-green-500 border-4 border-green-400 shadow-lg shadow-green-300' : ''}
                     ${isItemDestination ? 'bg-red-500 border-4 border-red-400 shadow-lg shadow-red-300' : ''}
                     ${isPath && !isCurrentLocation && !isItemDestination ? 'bg-blue-400 border-blue-500' : ''}
                   `}
                   style={{
-                    backgroundColor: section && !isCurrentLocation && !isItemDestination && !isPath
-                      ? section.color 
-                      : undefined,
                     aspectRatio: '1',
                     minHeight: '32px',
-                    zIndex: isItemDestination ? 5 : 1
+                    zIndex: isItemDestination ? 5 : 1,
+                    backgroundColor: (!isCurrentLocation && !isItemDestination && !isPath && section) ? 'transparent' : undefined
                   }}
-                  title={section ? section.name : ''}
+                  title={isCurrentLocation ? 'Start' : isItemDestination ? 'Destination' : (section ? section.name : '')}
                 >
                   {isCurrentLocation && (
                     <div className="absolute inset-0 flex items-center justify-center">
