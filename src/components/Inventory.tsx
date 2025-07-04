@@ -12,6 +12,16 @@ function groupByCategory(items: FoodItem[]): { category: string; items: FoodItem
   return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
 }
 
+// Pastel color palette for categories
+const pastelColors = [
+  'from-[#ffe0ec] to-[#e0f7fa]', // pink to blue
+  'from-[#fff5ba] to-[#baffc9]', // yellow to green
+  'from-[#bae1ff] to-[#ffd1dc]', // blue to pink
+  'from-[#baffc9] to-[#fff5ba]', // green to yellow
+  'from-[#ffd1dc] to-[#bae1ff]', // pink to blue
+  'from-[#e0f7fa] to-[#ffe0ec]', // blue to pink
+];
+
 export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ onAddItem }) => {
   // Search state
   const [query, setQuery] = useState('');
@@ -38,14 +48,14 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
       ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mt-8 w-8/12">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Live Store Inventory</h2>
+    <div className="w-full max-w-5xl mx-auto mt-8">
+      <h2 className="text-3xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-lg">Live Store Inventory</h2>
       {/* Search Bar */}
-      <div className="flex flex-col md:flex-row gap-3 items-center mb-8">
+      <div className="flex flex-col md:flex-row gap-3 items-center mb-10">
         <select
           value={selectedSection}
           onChange={e => setSelectedSection(e.target.value)}
-          className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 bg-white"
+          className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-800 bg-white font-semibold shadow-sm"
         >
           <option value="all">All Sections</option>
           {storeSections.map(section => (
@@ -58,12 +68,12 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search for food items..."
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-800 placeholder-gray-500"
+            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 text-gray-800 placeholder-gray-500 font-medium shadow-sm"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
               aria-label="Clear search"
             >
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -72,42 +82,52 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
           <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         </div>
       </div>
-      <div className="space-y-8 mt-4">
-        {grouped.map(group => (
-          <div key={group.category} className="">
-            <div className="flex items-center mb-3">
-              <div className="w-6 h-6 rounded-lg mr-2 bg-blue-200"></div>
-              <h3 className="text-xl font-semibold text-gray-900">{group.category}</h3>
-              <span className="ml-2 text-xs text-gray-500">({group.items.length} items)</span>
+      <div className="space-y-12">
+        {grouped.map((group, groupIdx) => (
+          <section
+            key={group.category}
+            className={`rounded-3xl shadow-xl border border-gray-200 bg-white/80 backdrop-blur-md transition-all duration-300`}
+          >
+            {/* Section Header */}
+            <div
+              className={`flex items-center justify-between px-8 py-4 rounded-t-3xl border-b border-gray-100 bg-gradient-to-r ${pastelColors[groupIdx % pastelColors.length]} shadow-sm`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="inline-block px-4 py-1 rounded-full bg-white/60 text-gray-700 text-base font-bold shadow tracking-wide border border-gray-200">
+                  {group.category}
+                </span>
+              </div>
+              <span className="text-xs text-gray-500 font-semibold">{group.items.length} items</span>
             </div>
-            <div className="relative">
-              <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-2 snap-x snap-mandatory">
+            {/* Items Scroll Area */}
+            <div className="relative px-4 py-6">
+              <div className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-2 snap-x snap-mandatory">
                 {group.items.length === 0 ? (
                   <div className="text-gray-400 italic px-4 py-6">No items in this category</div>
                 ) : (
                   group.items.map((item: FoodItem, idx: number) => (
                     <div
                       key={item.id}
-                      className="min-w-[220px] max-w-xs bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-xl transition-shadow duration-300 snap-center animate-fadeIn cursor-grab active:cursor-grabbing"
+                      className="min-w-[220px] max-w-xs bg-gradient-to-br from-white via-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-6 flex flex-col items-center shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 snap-center animate-fadeIn cursor-grab active:cursor-grabbing relative group"
                       style={{ animationDelay: `${idx * 30}ms` }}
                       draggable
                       onDragStart={e => {
                         e.dataTransfer.setData('application/json', JSON.stringify(item));
-                        e.currentTarget.classList.add('ring-4', 'ring-blue-400');
+                        e.currentTarget.classList.add('ring-4', 'ring-blue-300');
                       }}
                       onDragEnd={e => {
-                        e.currentTarget.classList.remove('ring-4', 'ring-blue-400');
+                        e.currentTarget.classList.remove('ring-4', 'ring-blue-300');
                       }}
                       title="Drag to add to shopping list"
                     >
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                        <span className="text-lg font-bold text-blue-600">{item.name.charAt(0)}</span>
+                      <div className="w-14 h-14 bg-gradient-to-br from-white via-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-3 shadow group-hover:scale-110 transition-transform duration-300">
+                        <span className="text-xl font-extrabold text-blue-400 drop-shadow-lg">{item.name.charAt(0)}</span>
                       </div>
-                      <h4 className="font-semibold text-gray-900 text-lg mb-1">{item.name}</h4>
-                      <p className="text-gray-500 text-sm mb-1">Category: <span className="font-medium text-gray-700">{item.category}</span></p>
+                      <h4 className="font-bold text-gray-800 text-lg mb-1 tracking-wide text-center drop-shadow-md">{item.name}</h4>
+                      <p className="text-gray-500 text-sm mb-1 text-center">Category: <span className="font-semibold text-blue-400/90">{item.category}</span></p>
                       <p className="text-gray-400 text-xs">Aisle: {item.location.aisle}, Shelf: {item.location.shelf}</p>
-                      <p className="text-gray-400 text-xs">Coords: ({item.location.coordinates.x}, {item.location.coordinates.y})</p>
-                      <span className="mt-2 text-xs text-blue-400">Drag to Shopping List</span>
+                      <p className="text-gray-400 text-xs mb-2">Coords: ({item.location.coordinates.x}, {item.location.coordinates.y})</p>
+                      <span className="mt-2 text-xs text-blue-400 group-hover:text-pink-400 transition-colors">Drag to Shopping List</span>
                     </div>
                   ))
                 )}
@@ -124,7 +144,7 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         ))}
       </div>
       {/* Animations */}

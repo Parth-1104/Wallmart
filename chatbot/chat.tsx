@@ -3,7 +3,7 @@ import { MessageCircle } from 'lucide-react';
 
 // Replace with your Gemini API endpoint and key
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const GEMINI_API_KEY = ' XYZ '; 
+const GEMINI_API_KEY = ' AIzaSyC5SRkt1aEwH95h1Qn8tuBB4hXKyRpjL4A '; 
 
 interface Message {
   sender: 'user' | 'bot';
