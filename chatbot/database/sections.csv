@@ -1,0 +1,19 @@
+id,section_name,color,x,y,width,height
+entrance,Entrance,#6B7280,1,9,2,1
+produce,Fresh Produce,#059669,1,1,4,3
+dairy,Dairy & Eggs,#2563EB,6,1,3,2
+meat,Meat & Seafood,#DC2626,10,1,3,2
+bakery,Bakery,#D97706,14,1,3,2
+deli,Deli,#7C3AED,6,4,3,2
+frozen,Frozen Foods,#0891B2,10,4,3,2
+pantry,Pantry Staples,#CA8A04,14,4,3,2
+snacks,Snacks & Candy,#EC4899,1,5,4,2
+beverages,Beverages,#8B5CF6,6,7,5,2
+health,Health & Beauty,#F59E0B,12,7,5,2
+household,Household Supplies,#10B981,18,1,4,2
+pets,Pet Supplies,#F43F5E,18,4,4,2
+electronics,Electronics,#3B82F6,18,7,4,2
+clothing,Clothing,#A21CAF,1,13,4,1
+toys,Toys,#F59E42,6,15,4,2
+stationery,Stationery,#6366F1,12,15,4,2
+checkout,Checkout,#374151,4,18,9,1
