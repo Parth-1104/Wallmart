@@ -1,0 +1,30 @@
+product_id,product_name,description,category,section_name,aisle,shelf,x,y,deal
+1,Apples,Fresh yellow apples,Fruit,Fresh Produce,1,A,2,2,20% Off
+2,Bananas,Fresh yellow bananas,Fruit,Fresh Produce,1,B,4,2,
+3,Carrots,Crunchy orange carrots,Vegetable,Fresh Produce,2,A,2,3,
+4,Spinach,Fresh spinach leaves,Vegetable,Fresh Produce,2,B,4,3,
+5,Milk,Whole milk 1 gallon,Dairy,Dairy & Eggs,3,A,7,1,Buy 1 Get 1
+6,Eggs,Organic free-range eggs,Dairy,Dairy & Eggs,3,B,8,2,
+7,Chicken Breast,Boneless chicken breast,Meat,Meat & Seafood,4,A,11,1,15% Off
+8,Salmon,Atlantic salmon fillet,Seafood,Meat & Seafood,4,B,12,2,
+9,Bread,Whole wheat bread loaf,Bakery,Bakery,5,A,15,1,2 for $5
+10,Croissants,Butter croissants,Bakery,Bakery,5,B,16,2,
+11,Turkey Slices,Sliced deli turkey,Deli,Deli,6,A,7,4,
+12,Ice Cream,Vanilla ice cream,Frozen,Frozen Foods,7,A,12,4,
+13,Rice,Long grain white rice,Pantry,Pantry Staples,8,A,15,4,
+14,Chips,Salted potato chips,Snacks,Snacks & Candy,9,A,2,5,10% Off
+15,Orange Juice,Fresh orange juice,Beverages,Beverages,10,A,8,7,Buy 2 Get 1 Free
+16,Shampoo,Herbal essence shampoo,Health,Health & Beauty,11,A,14,7,Save $1
+17,Laundry Detergent,Tide laundry detergent,Household,Household Supplies,12,A,19,1,
+18,Dog Food,Purina dog food,Pets,Pet Supplies,13,A,19,4,
+19,Cat Litter,Clumping cat litter,Pets,Pet Supplies,13,B,21,5,
+20,TV,Flat-screen TV,Electronics,Electronics,14,A,19,7,10% Off
+21,Headphones,Wireless headphones,Electronics,Electronics,14,B,21,8,
+22,T-shirt,Cotton t-shirt,Clothing,Clothing,15,A,2,13,
+23,Jeans,Denim jeans,Clothing,Clothing,15,B,4,13,
+24,Action Figure,Collectible action figure,Toys,Toys,16,A,7,15,BOGO 50% Off
+25,Board Game,Classic board game,Toys,Toys,16,B,9,16,
+26,Notebook,Spiral notebook,Stationery,Stationery,17,A,13,15,15% Off
+27,Pen Pack,Pack of pens,Stationery,Stationery,17,B,15,16,
+28,Reusable Bag,Reusable shopping bag,Checkout,Checkout,18,A,5,18,
+29,Gift Card,Store gift card,Checkout,Checkout,18,B,11,18,

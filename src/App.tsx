@@ -7,7 +7,7 @@ import { MultiItemNavigationPanel } from './components/MultiItemNavigationPanel'
 import { LocationSelector } from './components/LocationSelector';
 import { FoodItem } from './types';
 import { Inventory } from './components/Inventory';
-import Chatbot from '../chatbot/chat';
+import Chatbot from './components/chatbot/chat';
 import {BackgroundBeamsDemo} from'./components/Herohome'
 
 
