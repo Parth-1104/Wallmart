@@ -15,7 +15,10 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
   const [animationStep, setAnimationStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
-  const gridSize = { width: 24, height: 14 };
+  const maxX = Math.max(...storeSections.map(s => s.coordinates.x + s.coordinates.width));
+  const maxY = Math.max(...storeSections.map(s => s.coordinates.y + s.coordinates.height));
+  const gridSize = { width: maxX + 2, height: maxY + 2 }; // add padding for buffer
+
 
   const optimalRoute = currentLocation && shoppingList.length > 0 && showRoute 
     ? calculateOptimalRoute(currentLocation, shoppingList)
@@ -105,7 +108,8 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
   const hasDeal = currentItem && currentItem.deal;
 
   return (
-    <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 p-6 rounded-3xl shadow-2xl border border-gray-100 relative">
+    <div className="bg-white bg-opacity-95 p-6 rounded-3xl shadow-xl border border-gray-200 relative w-full max-w-7xl mx-auto">
+
       {/* Dynamic Island */}
       <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-40 px-6 py-3 rounded-full shadow-xl bg-black/80 flex items-center gap-4 text-white text-base font-medium min-w-[260px] max-w-[90vw] border border-gray-900/30">
         <span>
@@ -182,16 +186,14 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
           ))}
         </div>
         <div 
-          className="grid gap-0 mx-auto relative z-20"
-          style={{ 
-            gridTemplateColumns: `repeat(${gridSize.width}, 1fr)`,
-            gridTemplateRows: `repeat(${gridSize.height}, 1fr)`,
-            width: '100%',
-            maxWidth: '800px',
-            aspectRatio: `${gridSize.width}/${gridSize.height}`,
-            overflow: 'hidden',
-          }}
-        >
+  className="grid gap-0 mx-auto relative z-20 w-full max-w-[800px]"
+  style={{ 
+    gridTemplateColumns: `repeat(${gridSize.width}, 1fr)`,
+    gridTemplateRows: `repeat(${gridSize.height}, 1fr)`,
+    aspectRatio: `${gridSize.width}/${gridSize.height}`,
+  }}
+>
+
           {Array.from({ length: gridSize.height }).map((_, y) =>
             Array.from({ length: gridSize.width }).map((_, x) => {
               // Find if this cell is inside a section
@@ -227,7 +229,7 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
                 >
                   {isCurrentLocation && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-4 h-4 bg-white rounded-full shadow-md"></div>
+                      <div className="w-4 h-4 bg-red rounded-full shadow-md"></div>
                     </div>
                   )}
                   {isItemDestination && destinationNumber && (
@@ -314,7 +316,7 @@ export function MultiItemStoreMap({ shoppingList, currentLocation, showRoute }: 
 
       {/* Route Progress */}
       {showRoute && allPathCoordinates.length > 0 && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-100 border border-blue-200 rounded-xl">
+        <div className="mt-4 p-4 bg-transparent  border border-blue-200 rounded-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-blue-800">Shopping Progress</span>
             <span className="text-sm text-blue-600">
