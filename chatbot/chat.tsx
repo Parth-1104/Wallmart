@@ -16,33 +16,56 @@ const Chatbot: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  e.preventDefault();
+  if (!input.trim()) return;
 
-    const userMessage: Message = { sender: 'user', text: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
+  const userMessage: Message = { sender: 'user', text: input };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput('');
+  setLoading(true);
 
-    try {
-      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: input }] }],
-        }),
+  try {
+    // Step 1: Check if it's a product location query
+      const isLocationQuery = /(where|find|get|locate)/i.test(input);
+
+      if (isLocationQuery) {
+      const locationRes = await fetch("http://localhost:8000/product-location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: input }),
       });
-      const data = await response.json();
-      const botText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not understand.';
-      setMessages((prev) => [...prev, { sender: 'bot', text: botText }]);
+      console.log("fetched");
+
+        const locationData = await locationRes.json();
+
+        if (locationData?.name) {
+          const botText = `You can find ${locationData.name} in section ${locationData.section}, aisle ${locationData.aisle}, shelf ${locationData.shelf}.`;
+          setMessages((prev) => [...prev, { sender: 'bot', text: botText }]);
+        } else {
+          setMessages((prev) => [...prev, { sender: 'bot', text: "Sorry, I couldn't find that item." }]);
+        }
+      } else {
+        // Fallback to Gemini
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: input }] }],
+          }),
+        });
+        const data = await response.json();
+        const botText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not understand.';
+        setMessages((prev) => [...prev, { sender: 'bot', text: botText }]);
+      }
     } catch (err) {
-      setMessages((prev) => [...prev, { sender: 'bot', text: 'Error contacting Gemini API.' }]);
+      setMessages((prev) => [...prev, { sender: 'bot', text: 'wow baby' }]);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
 
