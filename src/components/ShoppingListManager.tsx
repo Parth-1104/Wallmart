@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, X, ShoppingCart, Route, Trash2 } from 'lucide-react';
+import { Plus, X, ShoppingCart, Route, Trash2, Layers } from 'lucide-react';
 import { FoodItem } from '../types';
-import { foodItems } from '../data/storeData';
+import { foodItems, storeSections } from '../data/storeData';
 
 interface ShoppingListManagerProps {
   shoppingList: FoodItem[];
@@ -37,6 +37,13 @@ export function ShoppingListManager({ shoppingList, onAddItem, onRemoveItem, onC
     setShowSuggestions(false);
   };
 
+  const handleAddAllSections = () => {
+    const itemsToAdd = storeSections.map(section =>
+      foodItems.find(item => item.location.section === section.id && !shoppingList.find(listItem => listItem.id === item.id))
+    ).filter(Boolean);
+    itemsToAdd.forEach(item => onAddItem(item as FoodItem));
+  };
+
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
       <div className="flex items-center gap-3 mb-4">
@@ -48,6 +55,16 @@ export function ShoppingListManager({ shoppingList, onAddItem, onRemoveItem, onC
           </span>
         )}
       </div>
+
+      {/* Add All Sections Button */}
+      <button
+        onClick={handleAddAllSections}
+        className="mb-3 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors"
+        type="button"
+      >
+        <Layers className="w-5 h-5" />
+        Add One Item from Every Section
+      </button>
 
       {/* Add Item Search */}
       <div className="relative mb-4">

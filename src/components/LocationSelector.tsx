@@ -12,13 +12,11 @@ export function LocationSelector({ onLocationSelect, selectedLocation }: Locatio
 
   const predefinedLocations = [
     { x: 2, y: 9, name: 'Store Entrance' },
-    { x: 8, y: 9, name: 'Checkout Area' },
-    { x: 3, y: 2, name: 'Produce Section' },
-    { x: 7, y: 1, name: 'Dairy Section' },
-    { x: 11, y: 1, name: 'Meat Section' },
-    { x: 15, y: 1, name: 'Bakery Section' },
-    { x: 8, y: 7, name: 'Beverages Section' },
-    { x: 14, y: 7, name: 'Health & Beauty' },
+    ...storeSections.map(section => ({
+      x: section.coordinates.x + Math.floor(section.coordinates.width / 2),
+      y: section.coordinates.y + Math.floor(section.coordinates.height / 2),
+      name: section.name
+    }))
   ];
 
   const handleLocationSelect = (location: { x: number; y: number; name: string }) => {
