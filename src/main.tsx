@@ -6,6 +6,7 @@ import Home from './pages/home.tsx';
 
 import App from './App.tsx';
 import './index.css';
+import Homesecond from './pages/Homesecond.tsx';
 
 
 createRoot(document.getElementById('root')!).render(
@@ -14,6 +15,9 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/home" element={<App />} />
         <Route path="/" element={<Home/>} />
+        <Route path="/map" element={<Homesecond/>} />
+
+
 
       </Routes>
     </BrowserRouter>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { foodItems, storeSections } from '../data/storeData';
 import { FoodItem } from '../types';
 
@@ -26,6 +27,26 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
   // Search state
   const [query, setQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  
+  // Refs for scroll containers
+  const scrollRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Scroll function
+  const scroll = (direction: 'left' | 'right', containerKey: string) => {
+    const container = scrollRefs.current[containerKey];
+    if (!container) return;
+    
+    const scrollAmount = 240; // Adjust scroll distance
+    const currentScroll = container.scrollLeft;
+    const targetScroll = direction === 'left' 
+      ? currentScroll - scrollAmount 
+      : currentScroll + scrollAmount;
+    
+    container.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+  };
 
   // Filter items by section and query
   const filteredItems = foodItems.filter(item => {
@@ -48,10 +69,11 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
       ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto mt-8">
-      <h2 className="text-3xl font-extrabold mb-10 text-center text-gray-800 tracking-tight drop-shadow-lg">Live Store Inventory</h2>
+    <div className="w-full max-w-5xl mx-auto mt-8 ">
+      <h2 className="text-3xl font-extrabold mb-10 text-center text-gray-50 tracking-tight drop-shadow-lg">Live Store Inventory</h2>
+      
       {/* Search Bar */}
-      <div className="flex flex-col md:flex-row gap-3 items-center mb-10">
+      <div className="flex flex-col md:flex-row gap-3 items-center mb-10 ">
         <select
           value={selectedSection}
           onChange={e => setSelectedSection(e.target.value)}
@@ -82,6 +104,7 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
           <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         </div>
       </div>
+
       <div className="space-y-12">
         {grouped.map((group, groupIdx) => (
           <section
@@ -99,9 +122,33 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
               </div>
               <span className="text-xs text-gray-500 font-semibold">{group.items.length} items</span>
             </div>
-            {/* Items Scroll Area */}
+
+            {/* Items Scroll Area with Navigation Buttons */}
             <div className="relative px-4 py-6">
-              <div className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-2 snap-x snap-mandatory">
+              {/* Left Scroll Button */}
+              <button
+                onClick={() => scroll('left', group.category)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-gray-200"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {/* Right Scroll Button */}
+              <button
+                onClick={() => scroll('right', group.category)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-gray-200"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {/* Scrollable Container */}
+              <div 
+                ref={el => scrollRefs.current[group.category] = el}
+                className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-2 snap-x snap-mandatory px-12"
+                style={{ scrollbarWidth: 'thin' }}
+              >
                 {group.items.length === 0 ? (
                   <div className="text-gray-400 italic px-4 py-6">No items in this category</div>
                 ) : (
@@ -132,21 +179,11 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
                   ))
                 )}
               </div>
-              {/* Left/Right scroll hint arrows */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-                <div className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center shadow-md animate-bounce-left">
-                  <svg width="18" height="18" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-                </div>
-              </div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-                <div className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center shadow-md animate-bounce-right">
-                  <svg width="18" height="18" fill="none" stroke="#888" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-                </div>
-              </div>
             </div>
           </section>
         ))}
       </div>
+
       {/* Animations */}
       <style>{`
         @keyframes fadeIn {
@@ -154,17 +191,23 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn { animation: fadeIn 0.6s cubic-bezier(.4,0,.2,1) both; }
-        @keyframes bounce-left {
-          0%, 100% { transform: translateY(-50%) translateX(0); }
-          50% { transform: translateY(-50%) translateX(-8px); }
+        
+        /* Custom scrollbar styles */
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 6px;
         }
-        .animate-bounce-left { animation: bounce-left 1.2s infinite; }
-        @keyframes bounce-right {
-          0%, 100% { transform: translateY(-50%) translateX(0); }
-          50% { transform: translateY(-50%) translateX(8px); }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
         }
-        .animate-bounce-right { animation: bounce-right 1.2s infinite; }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
+        }
       `}</style>
     </div>
   );
-}; 
+};
