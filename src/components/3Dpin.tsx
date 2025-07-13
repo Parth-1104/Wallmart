@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "../utils/lib";
+// import rawCsv from '../../components/chatbot/database/data.csv?raw';
 
 
 export const PinContainer = ({

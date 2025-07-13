@@ -69,7 +69,7 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
       ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto mt-8 ">
+    <div className="w-full max-w-6xl mx-auto mt-8 ">
       <h2 className="text-3xl font-extrabold mb-10 text-center text-gray-50 tracking-tight drop-shadow-lg">Live Store Inventory</h2>
       
       {/* Search Bar */}
@@ -124,7 +124,7 @@ export const Inventory: React.FC<{ onAddItem: (item: FoodItem) => void }> = ({ o
             </div>
 
             {/* Items Scroll Area with Navigation Buttons */}
-            <div className="relative px-4 py-6">
+            <div className="relative px-4 py-6 bg-black">
               {/* Left Scroll Button */}
               <button
                 onClick={() => scroll('left', group.category)}

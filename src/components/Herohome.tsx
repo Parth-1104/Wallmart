@@ -164,102 +164,99 @@ export function BackgroundBeamsDemo() {
           
           {/* Three Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            {/* Left Column - Inventory */}
-            <div className="lg:col-span-1">
-              <div 
-                className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl"
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <h2 className="text-xl font-semibold text-white">Store Inventory</h2>
-                </div>
-                <Inventory onAddItem={handleAddItem} />
-              </div>
-            </div>
+  {/* Left Column - Inventory */}
+  <div className="lg:col-span-2">
+    <div 
+      className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-4 h-3 bg-blue-500 rounded-full"></div>
+        <h2 className="text-xl font-semibold text-white">Store Inventory</h2>
+      </div>
+      <Inventory onAddItem={handleAddItem} />
+    </div>
+  </div>
 
-            {/* Center Column - Shopping List */}
-            <div className="lg:col-span-1">
-              <div
-                onDragOver={e => {
-                  e.preventDefault();
-                  e.currentTarget.classList.add('ring-4', 'ring-green-400', 'ring-opacity-50');
-                }}
-                onDragLeave={e => {
-                  e.currentTarget.classList.remove('ring-4', 'ring-green-400', 'ring-opacity-50');
-                }}
-                onDrop={e => {
-                  e.preventDefault();
-                  e.currentTarget.classList.remove('ring-4', 'ring-green-400', 'ring-opacity-50');
-                  try {
-                    const data = e.dataTransfer.getData('application/json');
-                    if (data) {
-                      const item = JSON.parse(data);
-                      handleAddItem(item);
-                    }
-                  } catch (err) {
-                    console.error("Invalid drag-drop data:", err);
-                  }
-                }}
-                className={`bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl transition-all duration-300 min-h-[400px] ${
-                  isDragging ? 'ring-2 ring-blue-400 ring-opacity-50 scale-105' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <h2 className="text-xl font-semibold text-white">Shopping List</h2>
-                </div>
-                <ShoppingListManager
-                  shoppingList={shoppingList}
-                  onAddItem={handleAddItem}
-                  onRemoveItem={handleRemoveItem}
-                  onClearList={handleClearList}
-                />
-              </div>
-            </div>
+  {/* Right Column - Shopping List + Navigation & Controls */}
+  <div className="space-y-8">
+    {/* Shopping List Manager */}
+    <div
+      onDragOver={e => {
+        e.preventDefault();
+        e.currentTarget.classList.add('ring-4', 'ring-green-400', 'ring-opacity-50');
+      }}
+      onDragLeave={e => {
+        e.currentTarget.classList.remove('ring-4', 'ring-green-400', 'ring-opacity-50');
+      }}
+      onDrop={e => {
+        e.preventDefault();
+        e.currentTarget.classList.remove('ring-4', 'ring-green-400', 'ring-opacity-50');
+        try {
+          const data = e.dataTransfer.getData('application/json');
+          if (data) {
+            const item = JSON.parse(data);
+            handleAddItem(item);
+          }
+        } catch (err) {
+          console.error("Invalid drag-drop data:", err);
+        }
+      }}
+      className={`bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl transition-all duration-300 min-h-[400px] ${
+        isDragging ? 'ring-2 ring-blue-400 ring-opacity-50 scale-105' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+        <h2 className="text-xl font-semibold text-white">Shopping List</h2>
+      </div>
+      <ShoppingListManager
+        shoppingList={shoppingList}
+        onAddItem={handleAddItem}
+        onRemoveItem={handleRemoveItem}
+        onClearList={handleClearList}
+      />
+    </div>
 
-            {/* Right Column - Navigation & Controls */}
-            <div className="lg:col-span-1 space-y-6">
-              
-              {/* Location Selector */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                  <h2 className="text-xl font-semibold text-white">Your Location</h2>
-                </div>
-                <LocationSelector
-                  onLocationSelect={handleLocationSelect}
-                  selectedLocation={currentLocation}
-                />
-              </div>
+    {/* Location Selector */}
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+        <h2 className="text-xl font-semibold text-white">Your Location</h2>
+      </div>
+      <LocationSelector
+        onLocationSelect={handleLocationSelect}
+        selectedLocation={currentLocation}
+      />
+    </div>
 
-              {/* Map Navigation Button */}
-              {shoppingList.length > 0 && currentLocation && (
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 shadow-2xl">
-                  <button
-                    onClick={goToMap}
-                    className="w-full bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-xl hover:bg-white/30 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                  >
-                    🗺️ View Store Map
-                  </button>
-                </div>
-              )}
+    {/* Map Navigation Button */}
+    {shoppingList.length > 0 && currentLocation && (
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 shadow-2xl">
+        <button
+          onClick={goToMap}
+          className="w-full bg-white/20 backdrop-blur-sm text-white py-4 px-6 rounded-xl hover:bg-white/30 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          🗺️ View Store Map
+        </button>
+      </div>
+    )}
 
-              {/* Navigation Panel */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                  <h2 className="text-xl font-semibold text-white">Navigation</h2>
-                </div>
-                <MultiItemNavigationPanel
-                  shoppingList={shoppingList}
-                  currentLocation={currentLocation}
-                />
-              </div>
-            </div>
-          </div>
+    {/* Navigation Panel */}
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 shadow-2xl">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+        <h2 className="text-xl font-semibold text-white">Navigation</h2>
+      </div>
+      <MultiItemNavigationPanel
+        shoppingList={shoppingList}
+        currentLocation={currentLocation}
+      />
+    </div>
+  </div>
+</div>
+
         </div>
       </main>
     </div>

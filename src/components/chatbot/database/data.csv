@@ -28,3 +28,5 @@ product_id,product_name,description,category,section_name,aisle,shelf,x,y,deal
 27,Pen Pack,Pack of pens,Stationery,Stationery,17,B,15,16,
 28,Reusable Bag,Reusable shopping bag,Checkout,Checkout,18,A,5,18,
 29,Gift Card,Store gift card,Checkout,Checkout,18,B,11,18,
+
+
