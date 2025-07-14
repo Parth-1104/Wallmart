@@ -7,7 +7,7 @@ import { GlowingEffect } from '../components/ui/Glowing-effect';
 import { PinContainer } from '../components/3Dpin';
 import { Link } from 'react-router-dom';
 import { FeaturesSectionDemo } from '../components/BentoGrid';
-import { MultiStepLoaderDemo } from '../components/loader';
+import { MultiStepLoaderDemo } from '../components/Loader';
 
 const Home = () => {
   const handleAnimationComplete = () => {
