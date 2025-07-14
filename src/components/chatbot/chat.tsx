@@ -127,7 +127,7 @@ const Chatbot: React.FC = () => {
               role: 'user',
               parts: [
                 {
-                  text: `You are an AI assistant for a grocery store, here to help customers with their shopping. Your primary goal is to provide accurate and helpful information *strictly* based on the provided "Store Inventory" data.
+                  text: `You are an AI assistant for a grocery store, here to help customers with their shopping. Your primary goal is to provide accurate and helpful information *strictly* based on the provided "Store Inventory, Do no tell the coordinates of the item" data.
 
 Here are your guidelines:
 
