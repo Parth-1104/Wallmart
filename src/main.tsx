@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 
-import Home from './pages/home.tsx';
+import Home from './pages/Home.tsx';
 import App from './App.tsx';
 import './index.css';
 import Homesecond from './pages/Homesecond.tsx';
