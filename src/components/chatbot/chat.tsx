@@ -6,7 +6,7 @@ import rawCsv from '../../components/chatbot/database/data.csv?raw';
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const GEMINI_API_KEY = 'AIzaSyC5SRkt1aEwH95h1Qn8tuBB4hXKyRpjL4A'; // Replace with your actual API key
+const GEMINI_API_KEY = 'AIzaSyBKvcXVPQ09IIp3P4QBfvAj2E6YDPxhWKM'; // Replace with your actual API key
 
 // Sample CSV data for demonstration
 
